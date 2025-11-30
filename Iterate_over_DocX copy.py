@@ -4,6 +4,9 @@ from docx.oxml import OxmlElement
 from docx.oxml.ns import qn
 from docx.shared import Pt
 from docx.enum.text import WD_ALIGN_PARAGRAPH
+import deep_translator
+
+doc_path = "input/IEC 62443-3-3 2013-image_table_content.docx"
 
 
 
@@ -15,7 +18,7 @@ def set_run_rtl(run):
     #bidi.set(qn('w:rtl'))
     rPr.append(bidi)
 
-def set_run_font(run,font_name='B Nazanin',font_size=12):
+def set_run_font(run,font_name,font_size):
     try:
         run.font.name = font_name
         run.font.size = Pt(font_size)
@@ -26,8 +29,8 @@ def set_run_font(run,font_name='B Nazanin',font_size=12):
         print("Error setting font for run")
         pass
     
-
-def set_runs_rtl_and_font(paragraph, font_name='B Nazanin', font_size=12):
+# Set to correct english-persian paragraphs
+def set_runs_rtl_and_font(paragraph, font_name='B Nazanin', font_size=11):
     for run in paragraph.runs:
         set_run_rtl(run)
         set_run_font(run,font_name,font_size)
@@ -44,26 +47,23 @@ def set_paragraph_direction(paragraph, direction="LTR"):
     bidi = OxmlElement('w:bidi')
     bidi.set(qn('w:val'), "1" if direction.upper() == "RTL" else "0")
     pPr.append(bidi)     
-       
 
 
-def translate(doc_path):
-
-    print(f"Translating : {doc_path}")
-    doc = Document(doc_path)
-    translator = GoogleTranslator(source='en', target='fa')
-    pre_cell_text = ""
-
+def translate_paragraphs():
     # Translate paragraphs
     for para in doc.paragraphs:
         print(f"Paragraph: {para.text}")
         translated = translator.translate(para.text)
         if translated:
-            para.text = translated            
-            set_paragraph_direction(para, direction="RTL")
-            set_runs_rtl_and_font(para, font_name='B Nazanin', font_size=12)
+            para.text = translated
+            set_paragraph_direction(para, direction="RTL")       
+            set_runs_rtl_and_font(para)       
+                  
+            
             
 
+def translate_tables():
+    pre_cell_text = ""
     # Translate tables
     for table in doc.tables:
         print("Table:")
@@ -75,22 +75,26 @@ def translate(doc_path):
                 translated = translator.translate(cell.text)                
                 print(f"Cell: {cell.text}")
                 
-
                 if translated:
                     cell.text = translated
 
                 for paragraph in cell.paragraphs:                    
-                    for run in paragraph.runs:
-                        set_run_rtl(run)
-                        set_run_font(run,font_name='B Nazanin', font_size=12)
-
+                    set_runs_rtl_and_font(paragraph)
+                   # set_paragraph_direction(paragraph, direction="RTL")
                     paragraph.alignment = WD_ALIGN_PARAGRAPH.RIGHT                    
 
         table.table_direction = 'rtl'
         table.alignment = WD_ALIGN_PARAGRAPH.CENTER
-       
-        
-    
+
+
+def translate(doc_path):
+    global doc
+    doc = Document(doc_path)
+    global translator
+    translator = GoogleTranslator(source='en', target='fa')
+    translate_paragraphs()
+    translate_tables()
     doc.save('output/translated.docx')
 
-translate("input/IEC 62443-3-3 2013-image_table_content.docx")
+
+translate(doc_path)
