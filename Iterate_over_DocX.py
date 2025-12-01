@@ -7,7 +7,6 @@ from docx.enum.text import WD_ALIGN_PARAGRAPH
 
 
 
-
 def set_run_rtl(run):
     r = run._r
     rPr = r.get_or_add_rPr()
@@ -15,7 +14,7 @@ def set_run_rtl(run):
     #bidi.set(qn('w:rtl'))
     rPr.append(bidi)
 
-def set_run_font(run,font_name='B Nazanin',font_size=12):
+def set_run_font(run,font_name='B Nazanin',font_size=10):
     try:
         run.font.name = font_name
         run.font.size = Pt(font_size)
@@ -27,7 +26,7 @@ def set_run_font(run,font_name='B Nazanin',font_size=12):
         pass
     
 
-def set_runs_rtl_and_font(paragraph, font_name='B Nazanin', font_size=12):
+def set_runs_rtl_and_font(paragraph, font_name='B Nazanin', font_size=10):
     for run in paragraph.runs:
         set_run_rtl(run)
         set_run_font(run,font_name,font_size)
@@ -61,7 +60,7 @@ def translate(doc_path):
         if translated:
             para.text = translated            
             set_paragraph_direction(para, direction="RTL")
-            set_runs_rtl_and_font(para, font_name='B Nazanin', font_size=12)
+            set_runs_rtl_and_font(para, font_name='B Nazanin', font_size=10)
             
 
     # Translate tables
@@ -82,7 +81,7 @@ def translate(doc_path):
                 for paragraph in cell.paragraphs:                    
                     for run in paragraph.runs:
                         set_run_rtl(run)
-                        set_run_font(run,font_name='B Nazanin', font_size=12)
+                        set_run_font(run,font_name='B Nazanin', font_size=10)
 
                     paragraph.alignment = WD_ALIGN_PARAGRAPH.RIGHT                    
 
@@ -92,5 +91,45 @@ def translate(doc_path):
         
     
     doc.save('output/translated.docx')
+
+
+def test():
+    doc = Document(doc_path)
+    i = 1
+    for table in doc.tables:
+        print("Table:")
+        for row in table.rows:          
+            print("count : ",len(row.cells))
+            for cell in row.cells:
+                
+                #print("H cell vmerge : ",cell._tc.get_or_add_tcPr().grid_span)
+                #print("V cell vmerge : ",cell._tc.get_or_add_tcPr().vMerge)          
+                if  i <cell._tc.get_or_add_tcPr().grid_span :
+                    i += 1
+                    continue
+                i = 1
+                print(f"Cell: {cell.text}")
+                    
+                
+                #for para in cell.paragraphs:
+                  #  print(f"Cell Paragraph: {para.text}")
+
+
+
+def test1():
+    doc = Document(doc_path)
+    for table in doc.tables:
+        for row in table.rows:
+            tr = row._tr
+            for tc in tr.tc_lst:
+                # -- vMerge="continue" indicates a spanned cell in a vertical merge --
+                print("tc.vMerge: ", tc.vMerge)
+                if tc.vMerge == "continue":
+                    print("continue")
+                    continue
+                # --  --
+                print("not continue")
+#translate(doc_path)
+test()
 
 translate("input/IEC 62443-3-3 2013-image_table_content.docx")
