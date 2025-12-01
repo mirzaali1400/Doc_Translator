@@ -4,7 +4,10 @@ from docx.oxml import OxmlElement
 from docx.oxml.ns import qn
 from docx.shared import Pt
 from docx.enum.text import WD_ALIGN_PARAGRAPH
-import deep_translator
+from colorama import Fore, Back, Style
+from rich.progress import Progress,track
+import sys
+
 
 doc_path = "input/IEC 62443-3-3 2013-image_table_content.docx"
 font_name = 'B Nazanin'
@@ -20,8 +23,7 @@ output_format = "docx"  # or "pdf"
 def set_run_rtl(run):
     r = run._r
     rPr = r.get_or_add_rPr()
-    bidi = OxmlElement('w:rtl')
-    #bidi.set(qn('w:rtl'))
+    bidi = OxmlElement('w:rtl')  
     rPr.append(bidi)
 
 def set_run_font(run,font_name,font_size):
@@ -31,8 +33,8 @@ def set_run_font(run,font_name,font_size):
         rPr = run._element.get_or_add_rPr()
         rFonts = rPr.rFonts     
         rFonts.set(qn('w:cs'), font_name)
-    except Exception:
-        print("Error setting font for run")
+    except Exception as e:
+        print(Fore.RED + Style.BRIGHT + "Error setting font for run")
         pass
     
 # Set to correct english-persian paragraphs
@@ -57,7 +59,7 @@ def set_paragraph_direction(paragraph, direction="LTR"):
 
 def translate_paragraphs():
     # Translate paragraphs
-    for para in doc.paragraphs:
+    for para in track(doc.paragraphs, description="[green]Translating paragraphs..."):
         print(f"Paragraph: {para.text}")
         translated = translator.translate(para.text)
         if translated:
@@ -71,9 +73,9 @@ def translate_paragraphs():
 def translate_tables():    
     # Translate tables
     counter = 1
-    for table in doc.tables:
+    for table in track(doc.tables, description="[green]Translating tables..."):
         print("Table:")
-        for row in table.rows:          
+        for row in track(table.rows, description="[green]Translating rows..."):          
             for cell in row.cells:
                 merge_count = cell._tc.get_or_add_tcPr().grid_span
                 if counter < merge_count :# skip merged cells
@@ -104,9 +106,14 @@ def translate(doc_path):
     doc = Document(doc_path)
     global translator
     translator = translators["google"](src='en', tgt='fa')
+    
     translate_paragraphs()
-    translate_tables()
+    translate_tables()   
     doc.save('output/translated.docx')
 
-translate(doc_path)
-
+if __name__ == "__main__":
+    if len(sys.argv) > 1:
+        print("args : ",sys.argv[1])
+    else:
+        print("no arg")
+    #translate(doc_path)
