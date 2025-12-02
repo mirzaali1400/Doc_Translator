@@ -2,7 +2,6 @@ import tkinter as tk
 from tkinter import filedialog, ttk, messagebox
 from docx import Document
 import threading
-import time  # used here to simulate a delay for translation
 from translator import translate
 
 # ---------------- Functions ----------------
@@ -29,12 +28,6 @@ def translate_and_save():
     except Exception as e:
         messagebox.showerror("Error", f"Could not read file:\n{e}")
         return
-
-
-
-
-
-
 
 # ---------------- GUI Setup ----------------
 root = tk.Tk()
