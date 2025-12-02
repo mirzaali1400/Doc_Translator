@@ -5,8 +5,9 @@ from docx.oxml.ns import qn
 from docx.shared import Pt
 from docx.enum.text import WD_ALIGN_PARAGRAPH
 from colorama import Fore, Back, Style
-from rich.progress import Progress,track
+from rich.progress import track
 import sys
+
 
 
 doc_path = "input/IEC 62443-3-3 2013-image_table_content.docx"
@@ -59,7 +60,12 @@ def set_paragraph_direction(paragraph, direction="LTR"):
 
 def translate_paragraphs():
     # Translate paragraphs
-    for para in track(doc.paragraphs, description="[green]Translating paragraphs..."):
+    para_count = len(doc.paragraphs)
+    counter = 0
+    for para in track(doc.paragraphs, description="[green]Translating paragraphs..."):  
+        if progress_callback:
+            counter += 1
+            progress_callback(counter / para_count * 50,"Translating paragraphs")      
         print(f"Paragraph: {para.text}")
         translated = translator.translate(para.text)
         if translated:
@@ -72,8 +78,13 @@ def translate_paragraphs():
 
 def translate_tables():    
     # Translate tables
+    table_count = len(doc.tables)
+    table_counter = 0
     counter = 1
-    for table in track(doc.tables, description="[green]Translating tables..."):
+    for table in track(doc.tables, description="[green]Translating tables..."):  
+        if progress_callback:            
+            progress_callback(50 + table_counter / table_count * 50,"Translating tables")      
+            table_counter += 1          
         print("Table:")
         for row in track(table.rows, description="[green]Translating rows..."):          
             for cell in row.cells:
@@ -95,25 +106,27 @@ def translate_tables():
                 for paragraph in cell.paragraphs:                    
                     set_runs_rtl_and_font(paragraph)
                     set_paragraph_direction(paragraph, direction="RTL")
-                   # paragraph.alignment = WD_ALIGN_PARAGRAPH.RIGHT                    
+                   # paragraph.alignment = WD_ALIGN_PARAGRAPH.RIGHT
+                          
 
         table.table_direction = 'rtl'
         table.alignment = WD_ALIGN_PARAGRAPH.CENTER
 
 
-def translate(doc_path):
+def translate(doc_path,callback=None):
     global doc
     doc = Document(doc_path)
     global translator
-    translator = translators["google"](src='en', tgt='fa')
+    translator = translators["google"](src='en', tgt='fa')   
+    global progress_callback
+    progress_callback = callback
     
-    translate_paragraphs()
-    translate_tables()   
+    translate_paragraphs()    
+    translate_tables()
+      
     doc.save('output/translated.docx')
 
-if __name__ == "__main__":
-    if len(sys.argv) > 1:
-        print("args : ",sys.argv[1])
-    else:
-        print("no arg")
-    #translate(doc_path)
+    progress_callback(100,"Translation Completed!")
+
+if __name__ == "__main__":   
+    translate(doc_path)
