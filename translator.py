@@ -17,7 +17,7 @@ font_size = 11
 translators = {
     "google": lambda src,tgt: GoogleTranslator(source=src,target=tgt),
     "deepl": lambda src,tgt: DeeplTranslator(api_key="YOUR_KEY", target=tgt, source=src),
-    "chatgpt": lambda src,tgt: ChatGptTranslator(api_key="YOUR_KEY",target=tgt,source=src),
+    "chatgpt": lambda src,tgt: ChatGptTranslator(api_key="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",target=tgt,source=src),
 }
 output_format = "docx"  # or "pdf"
 
@@ -118,7 +118,7 @@ def translate(doc_path,callback=None):
     global doc
     doc = Document(doc_path)
     global translator
-    translator = translators["google"](src='en', tgt='fa')   
+    translator = translators["chatgpt"](src='en', tgt='fa')   
     global progress_callback
     progress_callback = callback
 
