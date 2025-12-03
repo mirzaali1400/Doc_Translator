@@ -6,12 +6,8 @@ from docx.shared import Pt
 from docx.enum.text import WD_ALIGN_PARAGRAPH
 from colorama import Fore, Back, Style
 from rich.progress import track
-<<<<<<< HEAD
-import sys
-=======
 from tkinter import filedialog, messagebox
 import os
->>>>>>> master
 
 
 
@@ -125,18 +121,6 @@ def translate(doc_path,callback=None):
     translator = translators["google"](src='en', tgt='fa')   
     global progress_callback
     progress_callback = callback
-<<<<<<< HEAD
-    
-    translate_paragraphs()    
-    translate_tables()
-      
-    doc.save('output/translated.docx')
-
-    progress_callback(100,"Translation Completed!")
-
-if __name__ == "__main__":   
-    translate(doc_path)
-=======
 
     path,file_name = os.path.split(doc_path)
     file,ext = os.path.splitext(file_name)
@@ -158,4 +142,3 @@ if __name__ == "__main__":
         messagebox.showerror("Error", "No file selected.")
     else:
         translate(doc_path)
->>>>>>> master
