@@ -2,7 +2,10 @@ import tkinter as tk
 from tkinter import filedialog, ttk, messagebox
 from docx import Document
 import threading
+<<<<<<< HEAD
 import time  # used here to simulate a delay for translation
+=======
+>>>>>>> master
 from translator import translate
 
 # ---------------- Functions ----------------
@@ -30,12 +33,15 @@ def translate_and_save():
         messagebox.showerror("Error", f"Could not read file:\n{e}")
         return
 
+<<<<<<< HEAD
 
 
 
 
 
 
+=======
+>>>>>>> master
 # ---------------- GUI Setup ----------------
 root = tk.Tk()
 root.title("Translator with Progress Bar")
