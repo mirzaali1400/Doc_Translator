@@ -64,6 +64,8 @@ def translate_paragraphs():
     para_count = len(doc.paragraphs)
     counter = 0
     for para in track(doc.paragraphs, description="[green]Translating paragraphs..."):  
+        if para.text == "":
+            continue
         if progress_callback:
             counter += 1
             progress_callback(counter / para_count * 50,"Translating paragraphs")      
@@ -118,7 +120,7 @@ def translate(doc_path,callback=None):
     global doc
     doc = Document(doc_path)
     global translator
-    translator = translators["chatgpt"](src='en', tgt='fa')   
+    translator = translators["google"](src='en', tgt='fa')   
     global progress_callback
     progress_callback = callback
 
