@@ -8,16 +8,20 @@ from colorama import Fore, Back, Style
 from rich.progress import track
 from tkinter import filedialog, messagebox
 import os
+from datetime import datetime
+import time
 
 
 
 doc_path = "input/IEC 62443-3-3 2013-image_table_content.docx"
 font_name = 'B Nazanin'
+translator_name = "google"  # google, deepl, chatgpt
 font_size = 11
 translators = {
     "google": lambda src,tgt: GoogleTranslator(source=src,target=tgt),
     "deepl": lambda src,tgt: DeeplTranslator(api_key="YOUR_KEY", target=tgt, source=src),
-    "chatgpt": lambda src,tgt: ChatGptTranslator(api_key="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",target=tgt,source=src),
+    "chatgpt": lambda src,tgt: ChatGptTranslator(api_key="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"
+                                                 ,target=tgt,source=src,model="gpt-5.1"),
 }
 output_format = "docx"  # or "pdf"
 
@@ -70,7 +74,15 @@ def translate_paragraphs():
             counter += 1
             progress_callback(counter / para_count * 50,"Translating paragraphs")      
         print(f"Paragraph: {para.text}")
-        translated = translator.translate(para.text)
+        for i in range(1,3):
+            try:
+                translated = translator.translate(para.text)  
+                break
+            except:
+                print(Fore.RED + Style.BRIGHT + "Translation error, retrying...")
+                time.sleep(1)
+                continue
+        
         if translated:
             para.text = translated
             set_paragraph_direction(para, direction="RTL")       
@@ -99,8 +111,17 @@ def translate_tables():
                 if len(cell.text.strip()) <= 1:
                     continue
 
-                counter = 1     
-                translated = translator.translate(cell.text.strip())                
+                counter = 1 
+
+                for i in range(1,3):
+                    try:
+                        translated = translator.translate(cell.text.strip())  
+                        break
+                    except:
+                        print(Fore.RED + Style.BRIGHT + "Translation error, retrying...")
+                        time.sleep(1)
+                        continue  
+
                 print(f"Cell: {cell.text.strip()}")
                 
                 if translated:
@@ -120,13 +141,13 @@ def translate(doc_path,callback=None):
     global doc
     doc = Document(doc_path)
     global translator
-    translator = translators["google"](src='en', tgt='fa')   
+    translator = translators[translator_name](src='en', tgt='fa')   
     global progress_callback
     progress_callback = callback
 
     path,file_name = os.path.split(doc_path)
     file,ext = os.path.splitext(file_name)
-    ouptput_path = os.path.join(path,f"{file}_translated{ext}")
+    ouptput_path = os.path.join(path,f"{file}_translated_{translator_name}{ext}")
     
     translate_paragraphs()    
     translate_tables()      
@@ -143,4 +164,8 @@ if __name__ == "__main__":
     if not doc_path:
         messagebox.showerror("Error", "No file selected.")
     else:
-        translate(doc_path)
+        tic = datetime.now()
+        translate(doc_path)    
+        toc = datetime.now()
+        m,s = divmod((toc - tic).total_seconds(), 60)
+        print(Fore.GREEN + Style.BRIGHT + f"Translation completed in {int(m)} : {int(s)} ")
