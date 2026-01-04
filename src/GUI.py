@@ -2,7 +2,7 @@ import tkinter as tk
 from tkinter import filedialog, ttk, messagebox
 from docx import Document
 import threading
-from translator import translate
+from Translator import translate
 
 # ---------------- Functions ----------------
 def choose_file():

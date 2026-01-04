@@ -66,7 +66,7 @@ output_format = "docx"
 3. There are some codes that are for Right to Left languages and to be sure ouput doc is be i right font and format.   
 To find these methods i used some creative methods : 
     1. Extract xml structured of DocX file with convert the docx to zip and then extract it with WinRAR    
-    ![image](/src/img/WordFile_Structure.PNG)
+    ![image](./img/WordFile_Structure.PNG)
     2. Make some changes to to original doc and analyze changes in extracted files (i've used NotePad++ to track the changes and compare files). With this method i found how change the xml elements to set font, rtls for runs and so on.
 
     > ***Notes :***    
@@ -115,14 +115,36 @@ def set_paragraph_direction(paragraph, direction="LTR"):
 
 At this level there is 2 option to use this program :
 1. Using source code (both ChatGPT and Google Translate) 
-2. Using executable file that is generatged with PyIstaller library (Curentlly this method can use Google Translate)
+2. Using executable file that is generatged with PyIstaller library (Curentlly this method can use just Google Translate)
 
 ```py
 pip install pyinstaller
 
 # locate the python scripts directory and run this command in cmd or powershell
-pyinstaller --onefile -w 'filename.py' # --onefile is important to create just one executable
+python -O  -m pyinstaller --onefile --icon=icon.ico Translator.py 
+# --onefile is important to create just one executable
+# -O is for optimization
 ```
+
+>***Note:*** Run this command in bin directory for cleanness!! :). Executable is in bin/dist directory
+
+## GUI 
+I designed a GUI for this app with `tkinter` that is simple but can set some features for translator.
+![image](./img/GUI.png)
+
+
+To run this GUI just run it in GUI.py file.
+
+## TO DO
+
+1. PDF to Docx and vice versa (PDF2Docx and DocX2PDF are some options)
+2. Add more Options as Translator (Inter Models like NLLB (No Language Left Behind from face book) and Microsoft and so on)
+3. Add a Webserver or Bale Bot for Users to work with it smoothly  (python + FastAPI)
+4. Integrate Local model Translations with Onlines with Integrated Web Interface 
+5. Auto Detect source laguage 
+6. Add a Logger 
+7. Download some Datasets for Translation Ranking (What model is best in persian Translation , do like this for Persian OCR). There are some links in Chrome bookmarsk for this purpuses. [link1](https://huggingface.co/datasets/shenasa/English-Persian-Parallel-Dataset/viewer/default/train?views%5B%5D=train) and [link2](https://huggingface.co/datasets/persiannlp/parsinlu_translation_en_fa)
+
 
 
 
