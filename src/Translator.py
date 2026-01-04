@@ -13,15 +13,15 @@ import time
 
 
 
-doc_path = "input/IEC 62443-3-3 2013-image_table_content.docx"
+#doc_path = "input/IEC 62443-3-3 2013-image_table_content.docx"
 font_name = 'B Nazanin'
 translator_name = "google"  # google, deepl, chatgpt
 font_size = 11
+OPENAI_API_KEY = os.environ["OPENAI_API_KEY"]
 translators = {
     "google": lambda src,tgt: GoogleTranslator(source=src,target=tgt),
     "deepl": lambda src,tgt: DeeplTranslator(api_key="YOUR_KEY", target=tgt, source=src),
-    "chatgpt": lambda src,tgt: ChatGptTranslator(api_key="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"
-                                                 ,target=tgt,source=src,model="gpt-5.1"),
+    "chatgpt": lambda src,tgt: ChatGptTranslator(api_key=OPENAI_API_KEY , target=tgt,source=src,model="gpt-5.1"),
 }
 output_format = "docx"  # or "pdf"
 
@@ -110,6 +110,7 @@ def translate_tables():
 
                 if len(cell.text.strip()) <= 1:
                     continue
+                
 
                 counter = 1 
 
@@ -138,24 +139,27 @@ def translate_tables():
 
 
 def translate(doc_path,callback=None):
-    global doc
-    doc = Document(doc_path)
-    global translator
-    translator = translators[translator_name](src='en', tgt='fa')   
-    global progress_callback
-    progress_callback = callback
 
+    global doc
+    global progress_callback
+    global translator
+
+    doc = Document(doc_path)    
+    translator = translators[translator_name](src='en', tgt='fa')    
+    progress_callback = callback
     path,file_name = os.path.split(doc_path)
     file,ext = os.path.splitext(file_name)
     ouptput_path = os.path.join(path,f"{file}_translated_{translator_name}{ext}")
     
     translate_paragraphs()    
-    translate_tables()      
+    translate_tables() 
+
     doc.save(ouptput_path)
     if progress_callback:
         progress_callback(100,"Translation Completed!")
 
-if __name__ == "__main__":   
+if __name__ == "__main__":  
+
     doc_path = filedialog.askopenfilename(
         title="Select text file",
         filetypes=[("Word Files", "*.docx"), ("All Files", "*.*")]
