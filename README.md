@@ -2,7 +2,8 @@
 ## Content
 1. How it's works?
 2. Installation
-3. To Do ...
+3. GUI
+4. To Do ...
 
 ## How it's Works?
 This python based program is designed to translate some foreign languages to Persian. Current version is translating English to Persian and using this 2 models :    
