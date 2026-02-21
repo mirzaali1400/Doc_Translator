@@ -13,16 +13,25 @@ import time
 
 
 
-#doc_path = "input/IEC 62443-3-3 2013-image_table_content.docx"
+
 font_name = 'B Nazanin'
-translator_name = "google"  # google, deepl, chatgpt
+translator_name = "chatgpt"  # google, deepl, chatgpt
 font_size = 11
-OPENAI_API_KEY = os.environ["OPENAI_API_KEY"]
+ #global OPENAI_API_KEY
+try:
+     OPENAI_API_KEY = os.environ["OPENAI_API_KEY"]
+except KeyError:
+     print("Warning: OPENAI_API_KEY environment variable not set. ChatGPT translator will not work without it.")
+     OPENAI_API_KEY = None
+
 translators = {
     "google": lambda src,tgt: GoogleTranslator(source=src,target=tgt),
     "deepl": lambda src,tgt: DeeplTranslator(api_key="YOUR_KEY", target=tgt, source=src),
     "chatgpt": lambda src,tgt: ChatGptTranslator(api_key=OPENAI_API_KEY , target=tgt,source=src,model="gpt-5.1"),
 }
+translators_index = {
+    "1": "google",
+    "2": "chatgpt"}
 output_format = "docx"  # or "pdf"
 
 
@@ -74,7 +83,7 @@ def translate_paragraphs():
             counter += 1
             progress_callback(counter / para_count * 50,"Translating paragraphs")      
         print(f"Paragraph: {para.text}")
-        for i in range(1,3):
+        for i in range(1,10):
             try:
                 translated = translator.translate(para.text)  
                 break
@@ -158,16 +167,43 @@ def translate(doc_path,callback=None):
     if progress_callback:
         progress_callback(100,"Translation Completed!")
 
+
+def get_config():
+    global translator_name
+    translator_index =  input("Select Your Translator (1: Google, 2: ChatGPT): ")
+    if translator_index not in translators_index:
+        print(Fore.RED + Style.BRIGHT + "Invalid translator index, defaulting to Google Translator.")
+        translator_index = "1"    
+
+    try:
+        OPENAI_API_KEY = os.environ["OPENAI_API_KEY"]
+    except:
+        OPENAI_API_KEY = None
+
+    if translator_index =="2" and OPENAI_API_KEY is None:
+        print("ChatGPT API Key is needed. Please set the OPENAI_API_KEY environment variable.")
+        print("Default Translator (Google) will be used.")
+        translator_index = "1"
+        
+    translator_name = translators_index.get(translator_index)
+    
+        
+
+    
+
 if __name__ == "__main__":  
+   
 
     doc_path = filedialog.askopenfilename(
         title="Select text file",
         filetypes=[("Word Files", "*.docx"), ("All Files", "*.*")]
     ) 
-
     if not doc_path:
         messagebox.showerror("Error", "No file selected.")
+        
+
     else:
+        #get_config()
         tic = datetime.now()
         translate(doc_path)    
         toc = datetime.now()
