@@ -15,7 +15,7 @@ import time
 
 
 font_name = 'B Nazanin'
-translator_name = "chatgpt"  # google, deepl, chatgpt
+translator_name = "google"  # google, deepl, chatgpt
 font_size = 11
  #global OPENAI_API_KEY
 try:
@@ -147,7 +147,7 @@ def translate_tables():
         table.alignment = WD_ALIGN_PARAGRAPH.CENTER
 
 
-def translate(doc_path,callback=None):
+def translate(doc_path,translator_name = "google",callback=None):
 
     global doc
     global progress_callback
